@@ -1,0 +1,6 @@
+{
+  "name": "Aman Sweet",
+  "description": "Digital menu and ordering platform for Aman Sweet.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

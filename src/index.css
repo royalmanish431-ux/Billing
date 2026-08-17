@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@media print {
+  @page {
+    margin: 10mm;
+    size: auto;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #cart-modal,
+  #cart-modal * {
+    visibility: visible;
+  }
+
+  #cart-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    height: auto !important;
+    overflow: visible !important;
+    break-inside: avoid;
+  }
+
+  /* Hide buttons and unnecessary UI */
+  button,
+  .no-print {
+    display: none !important;
+  }
+}
