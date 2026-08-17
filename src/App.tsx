@@ -119,35 +119,32 @@ export default function App() {
     }, 100);
   };
 
+  const searchProduct = async (barcode: string) => {
+    if (!barcode) return;
+    try {
+        const response = await fetch(`/api/search-product?bill_no=${barcode}`);
+        const data = await response.json();
+        if (data && Array.isArray(data) && data.length > 0) {
+            const product = data[0];
+            setCustomItemName(product.item_name || '');
+            setCustomItemPrice(product.price || '');
+            setCustomItemQuantity(product.qty || '1');
+            setCustomItemStock(product.stock || '');
+            setGstPercentage(product.gst || '');
+        }
+    } catch (error) {
+        console.error("Error fetching product:", error);
+    }
+  };
+
   const removeFromCart = (index: number) => {
     setCart(cart.filter((_, i) => i !== index));
   };
 
-  const handleBarcodeScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleBarcodeScan = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      const barcode = e.currentTarget.value;
-      const savedProducts = JSON.parse(localStorage.getItem('custom_products') || '{}');
-      if (savedProducts[barcode]) {
-         const product = savedProducts[barcode];
-         const newItem: CartItem = {
-           id: Date.now(),
-           category: 'Custom',
-           hindi: '',
-           english: product.name,
-           portion: 'Custom',
-           halfPrice: '-',
-           fullPrice: '-',
-           selectedPortion: 'Custom',
-           selectedPrice: parseInt(product.price) || 0,
-           stock: parseInt(product.stock) || 0
-         };
-         setCart([...cart, newItem]);
-         setBarcodeInputValue('');
-      } else {
-         setScannedBarcode(barcode);
-         setBarcodeInputValue(barcode);
-         (document.getElementById('customItemNameInput') as HTMLInputElement)?.focus();
-      }
+      await searchProduct(e.currentTarget.value);
+      (document.getElementById('customItemNameInput') as HTMLInputElement)?.focus();
     }
   };
 
@@ -396,7 +393,7 @@ export default function App() {
                 <p className='font-bold text-base mb-4'>Naya Bill Banayein (Custom)</p>
                 
                 <div className="flex gap-2 mb-3">
-                  <input type="text" id="barcodeInput" value={barcodeInputValue} onChange={(e) => setBarcodeInputValue(e.target.value)} placeholder="Scan Barcode / QR Code" className="flex-1 border p-2.5 rounded-lg text-sm" onKeyDown={handleBarcodeScan} />
+                  <input type="text" id="barcodeInput" value={barcodeInputValue} onChange={(e) => setBarcodeInputValue(e.target.value)} onBlur={(e) => searchProduct(e.target.value)} placeholder="Scan Barcode / QR Code" className="flex-1 border p-2.5 rounded-lg text-sm" onKeyDown={handleBarcodeScan} />
                   <button onClick={startScanner} className="bg-white border border-gray-300 p-2.5 rounded-lg flex items-center gap-1 hover:bg-gray-50 text-sm">
                     <Camera size={16} /> Scan
                   </button>

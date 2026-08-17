@@ -26,6 +26,18 @@ async function startServer() {
     }
   });
 
+  app.get("/api/search-product", async (req, res) => {
+    const { bill_no } = req.query;
+    try {
+      const response = await fetch(`https://sheetdb.io/api/v1/kuvwdspgcg4ac/search?bill_no=${bill_no}`);
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Error searching in SheetDB:", error);
+      res.status(500).json({ error: "Failed to search" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
