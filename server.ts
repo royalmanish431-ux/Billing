@@ -29,11 +29,33 @@ async function startServer() {
   app.get("/api/search-product", async (req, res) => {
     const { bill_no } = req.query;
     try {
-      const response = await fetch(`https://sheetdb.io/api/v1/kuvwdspgcg4ac/search?bill_no=${bill_no}`);
-      const data = await response.json();
-      res.json(data);
+      // 1. Check SheetDB
+      const sheetResponse = await fetch(`https://sheetdb.io/api/v1/kuvwdspgcg4ac/search?bill_no=${bill_no}`);
+      const sheetData = await sheetResponse.json();
+      
+      if (sheetData && Array.isArray(sheetData) && sheetData.length > 0) {
+        return res.json(sheetData);
+      }
+
+      // 2. Fallback: Check Open Food Facts
+      const offResponse = await fetch(`https://world.openfoodfacts.org/api/v2/product/${bill_no}.json`);
+      const offData = await offResponse.json();
+
+      if (offData && offData.status === 1 && offData.product) {
+        const product = offData.product;
+        return res.json([{
+            bill_no: bill_no,
+            item_name: product.product_name || product.generic_name || `Item ${bill_no}`,
+            price: product.price || '99',
+            qty: '1',
+            stock: '10',
+            gst: '0'
+        }]);
+      }
+
+      res.json([]);
     } catch (error) {
-      console.error("Error searching in SheetDB:", error);
+      console.error("Error searching in SheetDB/OpenFoodFacts:", error);
       res.status(500).json({ error: "Failed to search" });
     }
   });

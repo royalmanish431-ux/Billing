@@ -21,16 +21,22 @@ function ProductCard({ item, onAddToCart }: ProductCardProps) {
   const hasHalf = item.halfPrice !== '-' && item.halfPrice !== '';
   const [choice, setChoice] = useState<'Half' | 'Full'>(hasHalf ? 'Half' : 'Full');
 
+  const isOutOfStock = item.stock === 'Out of stock' || item.stock === '0' || item.stock === '';
+
   const handleAdd = () => {
+     if (isOutOfStock) return;
      const price = choice === 'Half' ? parseInt(item.halfPrice) : parseInt(item.fullPrice);
      onAddToCart({ ...item, selectedPortion: choice, selectedPrice: price });
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition">
+    <div className={`bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition ${isOutOfStock ? 'opacity-70' : ''}`}>
       <div className="flex justify-between items-start">
         <div>
-          <span className="text-[10px] bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-full">{item.category}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded-full">{item.category}</span>
+            {isOutOfStock && <span className="text-[10px] bg-gray-200 text-gray-600 font-bold px-2 py-0.5 rounded-full">Out of Stock</span>}
+          </div>
           <h3 className="text-base font-bold text-gray-800 mt-1">{item.english}</h3>
           <p className="text-xs text-gray-500 font-medium">{item.hindi}</p>
         </div>
@@ -40,11 +46,11 @@ function ProductCard({ item, onAddToCart }: ProductCardProps) {
         {hasHalf ? (
           <div className="flex justify-between items-center text-xs">
             <label className="flex items-center gap-1">
-              <input type="radio" checked={choice === 'Half'} onChange={() => setChoice('Half')} />
+              <input type="radio" disabled={isOutOfStock} checked={choice === 'Half'} onChange={() => setChoice('Half')} />
               <span>Half: ₹{item.halfPrice}</span>
             </label>
             <label className="flex items-center gap-1">
-              <input type="radio" checked={choice === 'Full'} onChange={() => setChoice('Full')} />
+              <input type="radio" disabled={isOutOfStock} checked={choice === 'Full'} onChange={() => setChoice('Full')} />
               <span>Full: ₹{item.fullPrice}</span>
             </label>
           </div>
@@ -56,10 +62,11 @@ function ProductCard({ item, onAddToCart }: ProductCardProps) {
         )}
         <button 
           onClick={handleAdd}
-          className="w-full mt-2 bg-red-600 text-white py-2 rounded-full hover:bg-red-700 transition flex items-center justify-center gap-2"
+          disabled={isOutOfStock}
+          className={`w-full mt-2 py-2 rounded-full transition flex items-center justify-center gap-2 ${isOutOfStock ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-red-600 text-white hover:bg-red-700'}`}
         >
           <ShoppingCart size={16} />
-          Add to Cart
+          {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
         </button>
       </div>
     </div>
@@ -268,7 +275,8 @@ export default function App() {
               english: row[4] || '',
               portion: row[5] || '-',
               halfPrice: row[6] || '-',
-              fullPrice: row[7] || '-'
+              fullPrice: row[7] || '-',
+              stock: row[9] || ''
             });
           }
         }

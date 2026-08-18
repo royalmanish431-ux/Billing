@@ -6,10 +6,10 @@ export interface Product {
   portion: string;
   halfPrice: string;
   fullPrice: string;
+  stock: string;
 }
 
 export interface CartItem extends Product {
   selectedPortion: 'Half' | 'Full' | 'Custom';
   selectedPrice: number;
-  stock?: number;
 }
